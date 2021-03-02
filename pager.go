@@ -118,6 +118,7 @@ func (p *pager) Fetch(ctx context.Context, dst interface{}) error {
 		AddOn           []AddOn           `xml:"add_on"`
 		Coupon          []Coupon          `xml:"coupon"`
 		CreditPayment   []CreditPayment   `xml:"credit_payment"`
+		GiftCard        []GiftCard        `xml:"gift_card"`
 		ExportDate      []ExportDate      `xml:"export_date"`
 		ExportFile      []ExportFile      `xml:"export_file"`
 		Invoice         []Invoice         `xml:"invoice"`
@@ -151,6 +152,8 @@ func (p *pager) Fetch(ctx context.Context, dst interface{}) error {
 		*v = unmarshaler.Coupon
 	case *[]CreditPayment:
 		*v = unmarshaler.CreditPayment
+	case *[]GiftCard:
+		*v = unmarshaler.GiftCard
 	case *[]ExportDate:
 		*v = unmarshaler.ExportDate
 	case *[]ExportFile:
@@ -230,6 +233,16 @@ func (p *pager) FetchAll(ctx context.Context, dst interface{}) error {
 		var all []CreditPayment
 		for p.Next() {
 			var dst []CreditPayment
+			if err := p.Fetch(ctx, &dst); err != nil {
+				return err
+			}
+			all = append(all, dst...)
+		}
+		*v = all
+	case *[]GiftCard:
+		var all []GiftCard
+		for p.Next() {
+			var dst []GiftCard
 			if err := p.Fetch(ctx, &dst); err != nil {
 				return err
 			}
@@ -342,8 +355,14 @@ type PagerOptions struct {
 	// Returns records less than or equal to EndTime.
 	EndTime NullTime
 
-	State string // supported by some endpoints. Check Recurly's documenation.
-	Type  string // supported by some endpoints. Check Recurly's documentation.
+	// supported by some endpoints. Check Recurly's documentation.
+	State string
+	// supported by some endpoints. Check Recurly's documentation.
+	Type string
+	// supported by some endpoints. Check Recurly's documentation.
+	GifterAccountCode string
+	// supported by some endpoints. Check Recurly's documentation.
+	RecipientAccountCode string
 
 	// query is for any one-off URL params used by a specific endpoint.
 	// Values sent as time.Time or recurly.NullTime will be automatically
@@ -398,6 +417,14 @@ func (p PagerOptions) append(u *url.URL) {
 	}
 	if p.PerPage > 0 {
 		p.query["per_page"] = p.PerPage
+	}
+
+	if len(p.GifterAccountCode) > 0 {
+		p.query["gifter_account_code"] = p.GifterAccountCode
+	}
+
+	if len(p.RecipientAccountCode) > 0 {
+		p.query["recipient_account_code"] = p.RecipientAccountCode
 	}
 
 	p.query["begin_time"] = p.BeginTime.String()

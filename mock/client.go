@@ -15,6 +15,7 @@ type Client struct {
 	Billing           BillingService
 	Coupons           CouponsService
 	CreditPayments    CreditPaymentsService
+	GiftCards         GiftCardsService
 	Redemptions       RedemptionsService
 	Invoices          InvoicesService
 	Plans             PlansService
@@ -37,6 +38,7 @@ func NewClient(subdomain, apiKey string) *Client {
 	c.Client.Billing = &c.Billing
 	c.Client.Coupons = &c.Coupons
 	c.Client.CreditPayments = &c.CreditPayments
+	c.Client.GiftCards = &c.GiftCards
 	c.Client.Redemptions = &c.Redemptions
 	c.Client.Invoices = &c.Invoices
 	c.Client.Plans = &c.Plans
